@@ -1,3 +1,4 @@
+# Requested by Firelight Shine
 True airspeed keeps climbing as the air thins, so at altitude the vanilla gauge reads far higher than the number that matters for stall margin, corner speed and structural limits. Calibrated airspeed is the one real pilots fly by:
 
 image here
