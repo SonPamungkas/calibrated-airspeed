@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>Airspeed</AssemblyName>
+    <RootNamespace>Airspeed</RootNamespace>
+    <Product>Airspeed</Product>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <DebugType>portable</DebugType>
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json;
+      https://nuget.samboy.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <!-- Build and deploy must never diverge: a stale plugin DLL costs a full test cycle.
+       Override with /p:PluginDeployPath=... if the game lives elsewhere. -->
+  <PropertyGroup>
+    <PluginDeployPath Condition="'$(PluginDeployPath)'==''">C:\Program Files\Steam\steamapps\common\Nuclear Option\BepInEx\plugins</PluginDeployPath>
+  </PropertyGroup>
+
+  <Target Name="DeployPlugin" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDeployPath)"
+          Condition="Exists('$(PluginDeployPath)')" ContinueOnError="true" />
+    <Message Importance="high" Condition="Exists('$(PluginDeployPath)')"
+             Text="DEPLOYED $(TargetFileName) -> $(PluginDeployPath)" />
+    <Warning Condition="!Exists('$(PluginDeployPath)')"
+             Text="NOT DEPLOYED - plugin folder not found: $(PluginDeployPath). Copy $(TargetPath) manually." />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.16" IncludeAssets="compile" />
+    <!-- Rewired_Core must be publicized: the vendored RewiredActionInjector writes InputAction.id/
+         name/type and UserData.actions/actionCategories, all private in the shipped assembly. -->
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Game assemblies. Unity types come from the NuGet modules above; referencing the game's
+       UnityEngine*.dll here as well would produce duplicate-type errors. TextMeshPro and UI are
+       not in that package and hold the label types the patched readouts use; Aircraft's base
+       chain reaches Mirage.NetworkBehaviour; Rewired and Newtonsoft serve the vendored
+       InputFramework. Private=false: compile against these, never copy them to the output. -->
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\COMPILER_HERE\game\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\..\COMPILER_HERE\game\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\COMPILER_HERE\game\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mirage">
+      <HintPath>..\..\..\COMPILER_HERE\game\Mirage.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Rewired_Core" Publicize="True">
+      <HintPath>..\..\..\COMPILER_HERE\game\Rewired_Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\COMPILER_HERE\game\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
