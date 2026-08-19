@@ -1,7 +1,7 @@
 # Requested by Firelight Shine
 True airspeed keeps climbing as the air thins, so at altitude the vanilla gauge reads far higher than the number that matters for stall margin, corner speed and structural limits. Calibrated airspeed is the one real pilots fly by:
 
-image here
+![1000166258](https://github.com/user-attachments/assets/2b860f11-4b3f-4b1a-bc59-bd213d3e6712)
 
 At sea level the two are identical. At 6 km the gauge reads about three quarters of the vanilla number.
 
